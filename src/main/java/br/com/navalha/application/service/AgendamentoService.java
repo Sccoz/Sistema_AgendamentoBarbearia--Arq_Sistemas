@@ -36,7 +36,8 @@ public final class AgendamentoService {
         LocalDateTime inicio = LocalDateTime.of(data, horario);
         validarHorario(inicio, servico);
         Agendamento novo = new Agendamento(UUID.randomUUID(), cliente, telefone, servico, barbeiro, inicio);
-        if (repository.listar().stream().anyMatch(novo::conflitaCom)) throw regra("Este barbeiro já possui atendimento nesse intervalo.");
+        if (repository.listarPorBarbeiroNoDia(barbeiro, data).stream().anyMatch(novo::conflitaCom))
+            throw regra("Este barbeiro já possui atendimento nesse intervalo.");
         repository.salvar(novo);
         return novo;
     }
@@ -51,12 +52,15 @@ public final class AgendamentoService {
         Servico servico = servico(servicoTexto);
         Barbeiro barbeiro = barbeiro(barbeiroTexto);
         List<LocalTime> livres = new ArrayList<>();
-        List<Agendamento> existentes = repository.listar();
-        for (int minuto = 540; minuto + servico.getMinutos() <= 1140; minuto += 30) {
-            LocalDateTime inicio = dia.atStartOfDay().plusMinutes(minuto);
-            if (dia.getDayOfWeek() == DayOfWeek.SUNDAY || !inicio.isAfter(LocalDateTime.now(clock))) continue;
-            Agendamento candidato = new Agendamento(UUID.randomUUID(), "Consulta", "", servico, barbeiro, inicio);
-            if (existentes.stream().noneMatch(candidato::conflitaCom)) livres.add(inicio.toLocalTime());
+        List<Agendamento> existentes = repository.listarPorBarbeiroNoDia(barbeiro, dia);
+        LocalDateTime agora = LocalDateTime.now(clock);
+        LocalDateTime inicio = dia.atTime(Expediente.ABERTURA);
+        while (Expediente.atende(inicio, servico)) {
+            if (inicio.isAfter(agora)) {
+                Agendamento candidato = new Agendamento(UUID.randomUUID(), "Consulta", "", servico, barbeiro, inicio);
+                if (existentes.stream().noneMatch(candidato::conflitaCom)) livres.add(inicio.toLocalTime());
+            }
+            inicio = inicio.plusMinutes(Expediente.PASSO_MINUTOS);
         }
         return livres;
     }
@@ -68,11 +72,8 @@ public final class AgendamentoService {
     }
     private void validarHorario(LocalDateTime inicio, Servico servico) {
         if (!inicio.isAfter(LocalDateTime.now(clock))) throw regra("Escolha uma data e um horário futuros.");
-        if (inicio.getDayOfWeek() == DayOfWeek.SUNDAY) throw regra("Não atendemos aos domingos.");
-        LocalTime hora = inicio.toLocalTime();
-        if (hora.getMinute() % 30 != 0 || hora.isBefore(LocalTime.of(9, 0))
-                || inicio.plusMinutes(servico.getMinutos()).isAfter(inicio.toLocalDate().atTime(19, 0)))
-            throw regra("Atendemos das 09h às 19h, com inícios a cada 30 minutos e término até 19h.");
+        if (!Expediente.atende(inicio, servico))
+            throw regra("Atendemos de segunda a sábado, das 09h às 19h, com inícios a cada 30 minutos e término até 19h.");
     }
     private LocalDate data(String valor) {
         try { return LocalDate.parse(texto(valor)); }

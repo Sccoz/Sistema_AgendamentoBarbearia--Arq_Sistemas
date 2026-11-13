@@ -36,7 +36,7 @@ public final class AgendamentoController implements HttpHandler {
                 service.cancelar(path.substring("/api/agendamentos/".length()));
                 exchange.sendResponseHeaders(204, -1);
             } else respond(exchange, 404, "{\"mensagem\":\"Rota ou método não disponível.\"}");
-        } catch (RegraNegocioException | IllegalArgumentException e) {
+        } catch (RegraNegocioException e) {
             respond(exchange, 400, "{\"mensagem\":" + JsonPresenter.quote(e.getMessage()) + "}");
         } catch (NaoEncontradoException e) {
             respond(exchange, 404, "{\"mensagem\":" + JsonPresenter.quote(e.getMessage()) + "}");
@@ -49,7 +49,9 @@ public final class AgendamentoController implements HttpHandler {
         Map<String, String> result = new HashMap<>();
         if (raw != null && !raw.isEmpty()) for (String pair : raw.split("&")) {
             String[] parts = pair.split("=", 2);
-            result.put(URLDecoder.decode(parts[0], "UTF-8"), parts.length == 2 ? URLDecoder.decode(parts[1], "UTF-8") : "");
+            try {
+                result.put(URLDecoder.decode(parts[0], "UTF-8"), parts.length == 2 ? URLDecoder.decode(parts[1], "UTF-8") : "");
+            } catch (IllegalArgumentException e) { throw new RegraNegocioException("Parâmetros mal formatados."); }
         }
         return result;
     }
@@ -57,7 +59,7 @@ public final class AgendamentoController implements HttpHandler {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024]; int read;
         while ((read = input.read(buffer)) != -1) {
-            if (bytes.size() + read > 8192) throw new IllegalArgumentException("Formulário excede o limite de 8 KB.");
+            if (bytes.size() + read > 8192) throw new RegraNegocioException("Formulário excede o limite de 8 KB.");
             bytes.write(buffer, 0, read);
         }
         return new String(bytes.toByteArray(), StandardCharsets.UTF_8);

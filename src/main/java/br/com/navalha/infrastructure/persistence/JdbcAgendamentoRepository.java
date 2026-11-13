@@ -4,6 +4,7 @@ import br.com.navalha.application.port.AgendamentoRepository;
 import br.com.navalha.domain.*;
 import javax.sql.DataSource;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.*;
 
 /** Adaptador JDBC: SQL e mapeamento de registros, sem regras de agendamento. */
@@ -14,18 +15,34 @@ public final class JdbcAgendamentoRepository implements AgendamentoRepository {
         this.dataSource = Objects.requireNonNull(dataSource);
     }
 
+    private static final String SELECT = "SELECT id, cliente, telefone, servico, barbeiro, inicio FROM agendamento";
+
     @Override public List<Agendamento> listar() {
-        String sql = "SELECT id, cliente, telefone, servico, barbeiro, inicio FROM agendamento";
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
+             PreparedStatement statement = connection.prepareStatement(SELECT);
              ResultSet result = statement.executeQuery()) {
-            List<Agendamento> registros = new ArrayList<>();
-            while (result.next()) registros.add(new Agendamento(
-                UUID.fromString(result.getString("id")), result.getString("cliente"),
-                result.getString("telefone"), Servico.valueOf(result.getString("servico")),
-                Barbeiro.valueOf(result.getString("barbeiro")), result.getTimestamp("inicio").toLocalDateTime()));
-            return registros;
+            return mapear(result);
         } catch (SQLException e) { throw new IllegalStateException("Falha ao consultar agendamentos no banco.", e); }
+    }
+
+    @Override public List<Agendamento> listarPorBarbeiroNoDia(Barbeiro barbeiro, LocalDate dia) {
+        String sql = SELECT + " WHERE barbeiro = ? AND inicio >= ? AND inicio < ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, barbeiro.name());
+            statement.setTimestamp(2, Timestamp.valueOf(dia.atStartOfDay()));
+            statement.setTimestamp(3, Timestamp.valueOf(dia.plusDays(1).atStartOfDay()));
+            try (ResultSet result = statement.executeQuery()) { return mapear(result); }
+        } catch (SQLException e) { throw new IllegalStateException("Falha ao consultar agendamentos do barbeiro.", e); }
+    }
+
+    private List<Agendamento> mapear(ResultSet result) throws SQLException {
+        List<Agendamento> registros = new ArrayList<>();
+        while (result.next()) registros.add(new Agendamento(
+            UUID.fromString(result.getString("id")), result.getString("cliente"),
+            result.getString("telefone"), Servico.valueOf(result.getString("servico")),
+            Barbeiro.valueOf(result.getString("barbeiro")), result.getTimestamp("inicio").toLocalDateTime()));
+        return registros;
     }
 
     @Override public void salvar(Agendamento agendamento) {

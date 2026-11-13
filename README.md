@@ -5,7 +5,7 @@ Projeto acadêmico em **arquitetura em camadas**, com Java 8+ no backend e HTML/
 ## Abrir no IntelliJ
 
 1. Instale um **JDK** (8 ou superior), não apenas JRE.
-2. Extraia o pacote e abra a pasta `barbearia-java` em **File → Open**.
+2. Extraia o pacote e abra a pasta do projeto (a que contém o `pom.xml`) em **File → Open**.
 3. Importe como projeto Maven quando solicitado e selecione o JDK em **Project Structure → Project SDK**.
 4. Execute `br.com.navalha.Main` pelo botão verde ao lado de `main`.
 5. Acesse **http://localhost:8080** no navegador. Não abra o HTML como arquivo: ele precisa da API Java.
@@ -66,12 +66,14 @@ A interface pertence à aplicação; o adaptador de dados depende desse contrato
 ### Classes
 
 - `Agendamento`: entidade imutável, com identidade UUID, início, fim e teste de sobreposição.
+- `Expediente`: regra única de funcionamento (seg a sáb, 09h às 19h, passo de 30 min). Usada pelo serviço na validação e na listagem de horários.
 - `Servico` e `Barbeiro`: catálogos fixos do projeto; preços usam `BigDecimal`.
 - `CriarAgendamentoCommand`: dados de entrada independentes do transporte.
 - `AgendamentoService`: criar, listar, cancelar e consultar horários. Usa `Clock` injetado para testes determinísticos.
-- `AgendamentoRepository`: interface de persistência.
+- `AgendamentoRepository`: interface de persistência (`listar`, `listarPorBarbeiroNoDia`, `salvar`, `excluir`). A consulta por barbeiro e dia evita carregar a tabela inteira.
 - `JdbcAgendamentoRepository`: implementação SQL com `DataSource`, `PreparedStatement` e fechamento de conexões em `try-with-resources`.
 - `DatabaseConfig`: configura H2 e executa o schema inicial.
+- `H2Console`: inicia o console web do H2 (fora do `Main`).
 - `InMemoryAgendamentoRepository`: alternativa em memória, preservada para testes ou demonstrações.
 - `AgendamentoController`: adaptador HTTP, sem acesso à infraestrutura.
 - `JsonPresenter`: serialização das respostas, incluindo escape de caracteres.
