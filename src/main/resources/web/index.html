@@ -1,11 +1,178 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Navalha | Agenda Java</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
-<body><header><a class="brand" href="/">✂ NAVALHA <span class="brand-sub">BARBEARIA</span></a><span class="local-badge">Java · Agenda local</span></header><main>
-<div class="intro"><div><p class="eyebrow">CUIDADO EM CADA DETALHE</p><h1>Seu estilo.<br><span>Seu horário.</span></h1><p class="muted">Uma agenda simples para organizar os atendimentos.</p></div><div class="hours"><span>HORÁRIO DA CASA</span><strong>Segunda a sábado</strong><p>09h às 19h · Horário de Brasília</p></div></div>
-<div class="layout"><section class="panel"><div class="section-head"><span class="step">01</span><h2>Novo agendamento</h2></div>
-<form id="form" novalidate><label for="cliente">Cliente</label><input id="cliente" name="cliente" autocomplete="name" maxlength="80" placeholder="Nome completo">
-<label for="telefone">Telefone com DDD</label><input id="telefone" name="telefone" type="tel" autocomplete="tel" placeholder="(11) 99999-9999">
-<label for="servico">Serviço</label><select id="servico" name="servico"></select><label for="barbeiro">Barbeiro</label><select id="barbeiro" name="barbeiro"></select>
-<div class="fields"><div><label for="data">Data</label><input id="data" name="data" type="date"></div><div><label for="horario">Horário livre</label><select id="horario" name="horario"></select></div></div>
-<p id="resumo" class="summary"></p><button id="salvar" type="submit" class="primary" disabled>Confirmar agendamento ↗</button></form></section>
-<section class="panel"><div class="section-head"><span class="step">02</span><h2>Agenda de atendimentos</h2></div><div class="filter"><div><label for="filtro">Consultar data</label><input id="filtro" type="date"></div><button type="button" id="todos" class="secondary">Ver todos</button></div><p id="contagem" class="agenda-meta"></p><div id="lista"></div></section></div>
-<p id="mensagem" role="status" aria-live="polite" class="message" hidden></p></main><footer>Navalha · Java em camadas<span>Seus agendamentos ficam salvos neste computador.</span></footer></body></html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>Navalha | Agendamento de Barbearia</title>
+
+
+    <link rel="stylesheet" href="/style.css">
+    <script src="/app.js" defer></script>
+</head>
+
+
+<body>
+<header>
+    <a class="brand" href="/">
+        <span aria-hidden="true">✂</span>
+        NAVALHA
+        <span class="brand-sub">BARBEARIA</span>
+    </a>
+
+
+    <span class="local-badge">Agenda da barbearia</span>
+</header>
+
+
+<main>
+    <div class="intro">
+        <div>
+            <p class="eyebrow">CUIDADO EM CADA DETALHE</p>
+
+
+            <h1>
+                Seu estilo.<br>
+                <span>Seu horário.</span>
+            </h1>
+
+
+            <p class="muted">
+                Uma agenda simples para organizar os atendimentos.
+            </p>
+        </div>
+
+
+        <div class="hours">
+            <span>HORÁRIO DA CASA</span>
+            <strong>Segunda a sábado</strong>
+            <p>09h às 19h · Horário de Brasília</p>
+        </div>
+    </div>
+
+
+    <div class="layout">
+        <section class="panel" aria-labelledby="titulo-formulario">
+            <div class="section-head">
+                <span class="step" aria-hidden="true">01</span>
+                <h2 id="titulo-formulario">Novo agendamento</h2>
+            </div>
+
+
+            <form id="form" novalidate>
+                <label for="cliente">Cliente</label>
+                <input
+                        id="cliente"
+                        name="cliente"
+                        type="text"
+                        autocomplete="name"
+                        maxlength="80"
+                        placeholder="Nome completo"
+                        required
+                >
+
+
+                <label for="telefone">Telefone com DDD</label>
+                <input
+                        id="telefone"
+                        name="telefone"
+                        type="tel"
+                        autocomplete="tel"
+                        placeholder="(11) 99999-9999"
+                        required
+                >
+
+
+                <label for="servico">Serviço</label>
+                <select id="servico" name="servico" required></select>
+
+
+                <label for="barbeiro">Barbeiro</label>
+                <select id="barbeiro" name="barbeiro" required></select>
+
+
+                <div class="fields">
+                    <div>
+                        <label for="data">Data</label>
+                        <input
+                                id="data"
+                                name="data"
+                                type="date"
+                                required
+                        >
+                    </div>
+
+
+                    <div>
+                        <label for="horario">Horário livre</label>
+                        <select
+                                id="horario"
+                                name="horario"
+                                required
+                        ></select>
+                    </div>
+                </div>
+
+
+                <p id="resumo" class="summary"></p>
+
+
+                <button
+                        id="salvar"
+                        class="primary"
+                        type="submit"
+                        disabled
+                >
+                    Confirmar agendamento
+                    <span aria-hidden="true">↗</span>
+                </button>
+            </form>
+        </section>
+
+
+        <section class="panel" aria-labelledby="titulo-agenda">
+            <div class="section-head">
+                <span class="step" aria-hidden="true">02</span>
+                <h2 id="titulo-agenda">Agenda de atendimentos</h2>
+            </div>
+
+
+            <div class="filter">
+                <div>
+                    <label for="filtro">Consultar data</label>
+                    <input id="filtro" type="date">
+                </div>
+
+
+                <button id="todos" class="secondary" type="button">
+                    Ver todos
+                </button>
+            </div>
+
+
+            <p id="contagem" class="agenda-meta"></p>
+
+
+            <!-- O app.js insere os agendamentos neste elemento. -->
+            <div id="lista"></div>
+        </section>
+    </div>
+
+
+    <p
+            id="mensagem"
+            class="message"
+            role="status"
+            aria-live="polite"
+            hidden
+    ></p>
+</main>
+
+
+<footer>
+    <span>Navalha · Agendamento de barbearia</span>
+    <span>Seus agendamentos ficam salvos neste computador.</span>
+</footer>
+</body>
+</html>
