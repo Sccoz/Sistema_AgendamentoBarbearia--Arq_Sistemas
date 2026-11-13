@@ -6,3 +6,9 @@ target/
 out/
 *.class
 .DS_Store
+
+# Banco local e dados pessoais (não enviar ao Git)
+data/
+*.mv.db
+*.trace.db
+*.lock.db
