@@ -2,3 +2,7 @@
 *.iws
 *.iml
 *.ipr
+target/
+out/
+*.class
+.DS_Store
