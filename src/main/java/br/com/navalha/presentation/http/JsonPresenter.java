@@ -19,6 +19,9 @@ final class JsonPresenter {
     static String agendamento(Agendamento a) {
         return "{\"id\":" + quote(a.getId().toString()) + ",\"cliente\":" + quote(a.getCliente())
             + ",\"telefone\":" + quote(a.getTelefone()) + ",\"servico\":" + quote(a.getServico().getDescricao())
+            + ",\"servicoId\":" + quote(a.getServico().name())
+            + ",\"duracao\":" + a.getServico().getMinutos()
+            + ",\"barbeiroId\":" + quote(a.getBarbeiro().name())
             + ",\"barbeiro\":" + quote(a.getBarbeiro().getNome()) + ",\"inicio\":" + quote(a.getInicio().toString())
             + ",\"fim\":" + quote(a.getFim().toString()) + ",\"preco\":" + a.getServico().getPreco() + "}";
     }

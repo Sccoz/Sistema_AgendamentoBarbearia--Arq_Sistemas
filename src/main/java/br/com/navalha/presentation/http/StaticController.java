@@ -10,6 +10,7 @@ public final class StaticController implements HttpHandler {
         assets.put("/index.html", "text/html; charset=utf-8");
         assets.put("/style.css", "text/css; charset=utf-8");
         assets.put("/app.js", "application/javascript; charset=utf-8");
+        assets.put("/api.js", "application/javascript; charset=utf-8");
     }
     @Override public void handle(HttpExchange e) throws IOException {
         try {
@@ -20,6 +21,7 @@ public final class StaticController implements HttpHandler {
                 if (in == null) { e.sendResponseHeaders(404, -1); return; }
                 e.getResponseHeaders().set("Content-Type", assets.get(path));
                 e.getResponseHeaders().set("X-Content-Type-Options", "nosniff");
+                e.getResponseHeaders().set("Cache-Control", "no-cache");
                 e.sendResponseHeaders(200, 0);
                 byte[] buffer = new byte[4096]; int n;
                 while ((n = in.read(buffer)) != -1) e.getResponseBody().write(buffer, 0, n);

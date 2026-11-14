@@ -129,3 +129,24 @@ O H2 mantém dados no computador que executa o Java. Não há autenticação de 
 5. Tente reservar horários sobrepostos para o mesmo barbeiro: o serviço deve rejeitar.
 
 Referência do banco: https://h2database.com/html/tutorial.html
+
+## Interface e persistência
+
+A interface inclui agenda, calendário, busca, filtro por barbeiro, serviços e equipe.
+O frontend carrega o catálogo e os agendamentos pela API Java ao abrir e ao voltar à aba.
+Reservas só são confirmadas após o POST retornar sucesso; após criar ou cancelar,
+a agenda é consultada novamente no banco. Falhas de rede são exibidas sem simular sucesso.
+
+Os registros são persistidos no H2, em `data/barbearia.mv.db`. Recarregar a página
+não apaga registros. No navegador, somente a data escolhida e o filtro de barbeiro
+são lembrados no localStorage; não existe cópia paralela dos agendamentos.
+O calendário mostra as datas que possuem registros salvos, inclusive datas futuras.
+
+`api.js` é o adaptador HTTP do frontend. `app.js` cuida da apresentação e dos eventos.
+Disponibilidade, expediente, conflitos e validações continuam no backend Java.
+`JsonPresenter` retorna os identificadores de serviço e barbeiro e a duração,
+para que a interface não precise deduzir o contrato a partir dos nomes.
+
+Para conferir: crie um agendamento em uma data futura, recarregue e confirme que ele
+permanece na agenda. Encerre e reabra o Java na mesma pasta e confira novamente.
+Cancelar pelo site remove o registro do banco. Não apague a pasta `data`.
